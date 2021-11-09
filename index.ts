@@ -23,6 +23,11 @@ app.get("/", async (req, res) => {
 app.get("/:subreddit", async (req, res) => {
   try {
     const subreddit = req.params.subreddit;
+    if (subreddit === "favicon.ico") {
+        res.status(404).send("Not Found");
+        return;
+    }
+    console.log("SubReddit: " + subreddit);
     await serverSubreddit(subreddit, res);
   } catch (e) {
     console.error(e);
@@ -37,12 +42,12 @@ async function serverSubreddit(subreddit: string, res: express.Response) {
     "/top.json?show=all&limit=25&sort=top&t=week";
 
   console.log(url);
-  const response = await got(url);
+  const response = await got(url, { throwHttpErrors: false });
   const json = JSON.parse(response.body);
   const post = json.data.children[Math.floor(Math.random() * 25)].data;
   const imageUrl = post.url;
   console.log("imageUrl: " + imageUrl);
-  const image = await got(imageUrl);
+  const image = await got(imageUrl, { throwHttpErrors: false });
   const imageBuffer = image.rawBody;
   const resultBuffer = await sharp(imageBuffer)
     .resize(1920, 1080, { fit: "outside" })
