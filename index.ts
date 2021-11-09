@@ -24,8 +24,8 @@ app.get("/:subreddit", async (req, res) => {
   try {
     const subreddit = req.params.subreddit;
     if (subreddit === "favicon.ico") {
-        res.status(404).send("Not Found");
-        return;
+      res.status(404).send("Not Found");
+      return;
     }
     console.log("SubReddit: " + subreddit);
     await retry(async () => await serverSubreddit(subreddit, res));
@@ -35,7 +35,7 @@ app.get("/:subreddit", async (req, res) => {
   }
 });
 
-async function retry(fn: () => Promise<any>, retries: number = 5) {
+async function retry<T>(fn: () => Promise<T>, retries: number = 5): Promise<T> {
   try {
     return await fn();
   } catch (e) {
