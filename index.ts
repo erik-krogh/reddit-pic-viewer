@@ -12,7 +12,7 @@ const app = express();
 
 app.get("/", async (req, res) => {
   try {
-    await serverSubreddit("EarthPorn", res);
+    await retry(async () => await serverSubreddit("EarthPorn", res));
   } catch (e) {
     console.error(e);
     res.status(500).send("Internal Server Error");
@@ -28,12 +28,23 @@ app.get("/:subreddit", async (req, res) => {
         return;
     }
     console.log("SubReddit: " + subreddit);
-    await serverSubreddit(subreddit, res);
+    await retry(async () => await serverSubreddit(subreddit, res));
   } catch (e) {
     console.error(e);
     res.status(500).send("Internal Server Error");
   }
 });
+
+async function retry(fn: () => Promise<any>, retries: number = 5) {
+  try {
+    return await fn();
+  } catch (e) {
+    if (retries <= 0) {
+      throw e;
+    }
+    return retry(fn, retries - 1);
+  }
+}
 
 async function serverSubreddit(subreddit: string, res: express.Response) {
   const url =
